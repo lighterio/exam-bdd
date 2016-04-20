@@ -1,0 +1,23 @@
+{
+  "name": "exam-bdd",
+  "version": "0.0.1",
+  "description": "Adds BDD-style syntax to Exam.",
+  "main": "exam-bdd.js",
+  "scripts": {
+    "test": "exam"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sullux/exam-bdd.git"
+  },
+  "keywords": [
+    "exam",
+    "bdd"
+  ],
+  "author": "Charles Sullivan <sullux+npm@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Sullux/exam-bdd/issues"
+  },
+  "homepage": "https://github.com/Sullux/exam-bdd#readme"
+}

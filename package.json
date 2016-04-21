@@ -19,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/Sullux/exam-bdd/issues"
   },
-  "homepage": "https://github.com/Sullux/exam-bdd#readme"
+  "homepage": "https://github.com/Sullux/exam-bdd#readme",
+  "dependencies": {
+    "exam": "^1.3.0"
+  }
 }

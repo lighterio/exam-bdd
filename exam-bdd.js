@@ -18,11 +18,14 @@ var isVerbose
 })(process.argv)
 
 var self = module.exports = {
+  isVerbose: isVerbose,
+
   feature: function (description, fn) {
     describe('Feature: ' + description, function () {
       fn.apply(self, [])
     })
   },
+
   scenario: function (description, fn) {
     var context = createTestContext({
       description: description
@@ -46,7 +49,9 @@ global.scenario = self.scenario
 
 function createScenario (context) {
   var scenario = {
-    mock: function mock (lib, options) { mockInContext(context, lib, options) },
+    mock: function mock (lib, libContext, options) {
+      return mockInContext(context, lib, libContext, options)
+    },
     given: function given (description, fn) {
       var prefix = scenario.given.prefix || 'Given'
       if (context.whens.length || context.thens.length) {
@@ -106,14 +111,49 @@ function createScenario (context) {
     delete scenario.when
     return scenario
   }
+  scenario.mock.track = function () {
+    return this.apply(undefined, arguments)
+  }
   return scenario
 }
 
-function mockInContext (context, lib, options) {
-  mock(lib, options)
+function mockInContext (context, lib, libContext, options) {
   context.teardown.push(function () {
     unmock(lib)
   })
+  if (!options) {
+    options = libContext
+    libContext = undefined
+  }
+  if (options === context.publicScenario.mock.track) {
+    // This will force all functions to be mocked and tracked.
+    options = lib
+  }
+  var mockOptions = {}
+  for (var key in options) {
+    ;(function () {
+      var value = options[key]
+      if (typeof value !== 'function') {
+        mockOptions[key] = value
+        return
+      }
+      var originalImplementation = lib[key]
+      var base = function () {
+        return originalImplementation.apply(lib, arguments)
+      }
+      var info
+      var implementation = mockOptions[key] = function () {
+        info.count++
+        info.calls.push(Array.prototype.slice.call(arguments))
+        // Call the mock function with `this` set to the base implementation
+        return value.apply(base, arguments)
+      }
+      info = libContext ? libContext[key] || (libContext[key] = {}) : implementation
+      info.count = 0
+      info.calls = []
+    })()
+  }
+  return mock(lib, mockOptions)
 }
 
 function createTestContext (scenario) {
@@ -133,7 +173,7 @@ function executeContext (context) {
   var text = [
     'Scenario: ' + context.scenario.description
   ]
-  if (isVerbose) {
+  if (self.isVerbose) {
     addItemTextToArray(context.givens, text)
     addItemTextToArray(context.whens, text)
     addItemTextToArray(context.thens, text)

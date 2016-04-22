@@ -1,6 +1,6 @@
 {
   "name": "exam-bdd",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Adds BDD-style syntax to Exam.",
   "main": "exam-bdd.js",
   "scripts": {

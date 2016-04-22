@@ -50,18 +50,18 @@ describe('BDD', function () {
     }
     var scenario = this
     this
-      .given('a mocked object', () => {
+      .given('a mocked object', function () {
         // first allow the mock to be torn down
         this.mock(obj, { foo: function () { return 'baz' } })
         // then check to be sure it worked
-        scenario.after(() => {
+        scenario.after(function () {
           assert(obj.foo() === 'bar')
         })
       })
-      .when('mocked function is called', () => {
+      .when('mocked function is called', function () {
         this.result = obj.foo()
       })
-      .then('we get the mocked result', () => {
+      .then('we get the mocked result', function () {
         assert(this.result === 'baz')
       })
   })

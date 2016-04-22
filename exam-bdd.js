@@ -27,10 +27,10 @@ var self = module.exports = {
     var context = createTestContext({
       description: description
     })
-    context.publicScenario = createScenario(context)
+    var scenario = context.publicScenario = createScenario(context)
     context.scenarioContext = {
-      mock: context.mock,
-      unmock: context.unmock
+      mock: scenario.mock,
+      unmock: scenario.unmock
     }
     try {
       fn.apply(context.publicScenario, [])

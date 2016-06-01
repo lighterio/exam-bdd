@@ -189,6 +189,76 @@ describe('BDD', function () {
         assert(lib.bar.count === 1)
       })
   })
+
+  scenario('an object can be unmocked', function () {
+    var lib = {
+      foo: function (arg1) {
+        return arg1
+      }
+    }
+    this
+      .given('a mocked object', function () {
+        this.mock(lib, { foo: function () { return 'baz' } })
+      })
+      .when('the object is unmocked', function () {
+        this.unmock(lib)
+      })
+      .and('the unmocked function is called', function () {
+        this.result = lib.foo('bar')
+      })
+      .then('we get the unmocked result', function () {
+        assert(this.result === 'bar')
+      })
+  })
+
+  scenario('a twice-mocked object can be unmocked once', function () {
+    var lib = {
+      foo: function (arg1) {
+        return arg1
+      }
+    }
+    this
+      .given('a mocked object', function () {
+        this.mock(lib, { foo: function () { return 'baz' } })
+      })
+      .when('the object is mocked again', function () {
+        this.mock(lib, { foo: function () { return 'bazzz' } })
+      })
+      .and('the object is unmocked', function () {
+        this.unmock(lib)
+      })
+      .and('the unmocked function is called', function () {
+        this.result = lib.foo('bar')
+      })
+      .then('we get the unmocked result', function () {
+        assert.equal(this.result, 'baz')
+      })
+  })
+
+  scenario('a twice-mocked object can be unmocked twice', function () {
+    var lib = {
+      foo: function (arg1) {
+        return arg1
+      }
+    }
+    this
+      .given('a mocked object', function () {
+        this.mock(lib, { foo: function () { return 'baz' } })
+      })
+      .when('the object is mocked again', function () {
+        this.mock(lib, { foo: function () { return 'bazzz' } })
+      })
+      .and('the object is unmocked twice', function () {
+        this.unmock(lib)
+        this.unmock(lib)
+      })
+      .and('the unmocked function is called', function () {
+        this.result = lib.foo('bar')
+      })
+      .then('we get the unmocked result', function () {
+        assert(this.result === 'bar')
+      })
+  })
 })
 
 function itShouldThrow () {

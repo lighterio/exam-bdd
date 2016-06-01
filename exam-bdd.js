@@ -1,8 +1,9 @@
 'use strict'
 /* global it describe */
 
-var mock = require('exam/lib/mock')
-var unmock = mock.unmock
+var baseMock = require('exam/lib/mock')
+var baseUnmock = baseMock.unmock
+var priorMocksProperty = '_EXAM_MOCKED_PROPERTIES'
 
 var verboseFlag = '-v'
 var isVerbose
@@ -51,6 +52,20 @@ function createScenario (context) {
   var scenario = {
     mock: function mock (lib, libContext, options) {
       return mockInContext(context, lib, libContext, options)
+    },
+    unmock: function unmock (lib) {
+      var index
+      var teardown = context.teardown
+      for (var i = 0, count = teardown.length; i < count; i++) {
+        if (teardown[i].lib === lib) {
+          teardown[i]()
+          index = i
+          break
+        }
+      }
+      if (index) {
+        teardown.splice(index, 1)
+      }
     },
     given: function given (description, fn) {
       var prefix = scenario.given.prefix || 'Given'
@@ -118,9 +133,11 @@ function createScenario (context) {
 }
 
 function mockInContext (context, lib, libContext, options) {
-  context.teardown.push(function () {
+  var unmockLib = function () {
     unmock(lib)
-  })
+  }
+  unmockLib.lib = lib
+  context.teardown.push(unmockLib)
   if (!options) {
     options = libContext
     libContext = undefined
@@ -154,6 +171,51 @@ function mockInContext (context, lib, libContext, options) {
     })()
   }
   return mock(lib, mockOptions)
+}
+
+function mock (lib, options) {
+  var mocks = lib[priorMocksProperty]
+  if (!mocks) {
+    Object.defineProperty(lib, priorMocksProperty, {
+      enumerable: false,
+      configurable: true, // Without this, the property cannot be deleted.
+      value: []
+    })
+    mocks = lib[priorMocksProperty]
+  }
+  mocks.push(options)
+  if (mocks.length === 1) {
+    return baseMock(lib, options)
+  }
+  options = mergeOptions(mocks)
+  baseUnmock(lib)
+  return baseMock(lib, options)
+}
+
+function unmock (lib) {
+  baseUnmock(lib)
+  var mocks = lib[priorMocksProperty]
+  if (!mocks) {
+    return
+  }
+  mocks.splice(mocks.length - 1, 1)
+  if (!mocks.length) {
+    delete lib[priorMocksProperty]
+    return
+  }
+  // re-mock it to the previously mocked state
+  baseMock(lib, mergeOptions(lib[priorMocksProperty]))
+}
+
+function mergeOptions (optionsArray) {
+  var mergedOptions = {}
+  for (var i = 0, count = optionsArray.length; i < count; i++) {
+    var options = optionsArray[i]
+    for (var key in options) {
+      mergedOptions[key] = options[key]
+    }
+  }
+  return mergedOptions
 }
 
 function createTestContext (scenario) {

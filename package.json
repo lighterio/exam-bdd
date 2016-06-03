@@ -1,6 +1,6 @@
 {
   "name": "exam-bdd",
-  "version": "0.0.1",
+  "version": "0.0.5",
   "description": "Adds BDD-style syntax to Exam.",
   "main": "exam-bdd.js",
   "scripts": {
@@ -19,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/Sullux/exam-bdd/issues"
   },
-  "homepage": "https://github.com/Sullux/exam-bdd#readme"
+  "homepage": "https://github.com/Sullux/exam-bdd#readme",
+  "dependencies": {
+    "exam": "^1.3.0"
+  }
 }
